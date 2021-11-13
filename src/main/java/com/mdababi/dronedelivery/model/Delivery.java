@@ -22,4 +22,7 @@ public class Delivery {
     private Drone drone;
     @OneToMany
     private List<Medication> medicationList = new ArrayList<>();
+
+    public Delivery(Drone drone, List<Medication> medicationList) {
+    }
 }
