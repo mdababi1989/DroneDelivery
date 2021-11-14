@@ -1,7 +1,9 @@
 package com.mdababi.dronedelivery.services.serviceImpl;
 
 
+import com.mdababi.dronedelivery.exceptions.*;
 import com.mdababi.dronedelivery.model.Delivery;
+import com.mdababi.dronedelivery.model.DeliveryDto;
 import com.mdababi.dronedelivery.model.Drone;
 import com.mdababi.dronedelivery.model.Medication;
 import com.mdababi.dronedelivery.repositories.DeliveryRepository;
@@ -24,33 +26,30 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public List<Delivery> getDeliveryList() {
-        return deliveryRepository.findAll();
+        List<Delivery> deliveryList = deliveryRepository.findAll();
+        if (deliveryList.isEmpty()) throw new NoDataFoundException("Delivery");
+        return deliveryList;
     }
 
     @Override
-    public Delivery saveDelivery(Delivery delivery) {
-        return deliveryRepository.save(delivery);
-    }
+    public Delivery createDelivery(DeliveryDto deliveryDto) {
 
-    @Override
-    public void deleteDelivery(Long id) {
-        deliveryRepository.deleteById(id);
-    }
-
-    @Override
-    public Delivery createDelivery(String droneSerialNumber, List<String> medicationCodes) {
-
-        Drone drone = droneService.findById(droneSerialNumber);
-        if(drone == null) throw new EntityNotFoundException("there is no drone with serial number: "+droneSerialNumber);
+        Drone drone = droneService.findById(deliveryDto.getDroneSerialNumber());
+        if (drone == null) throw new DroneNotFoundException(deliveryDto.getDroneSerialNumber());
+        if (drone.getBatteryCapacity() < 25)
+            throw new LowBatteryException("Medication can't be loaded! Drone battery capacity is under 25%");
         List<Medication> medicationList = new ArrayList<>();
-        for(String medicationCode: medicationCodes){
+        int medicationWeightSum = 0;
+        for (String medicationCode : deliveryDto.getMedicationList()) {
             Medication medication = medicationService.findById(medicationCode);
-            if(medication == null )throw new EntityNotFoundException("there is no medication with code: "+medicationCode);
+            if (medication == null) throw new MedicationNotFoundException(medicationCode);
             medicationList.add(medication);
+            medicationWeightSum += medication.getWeight();
         }
-
+        if (medicationWeightSum > drone.getWeightLimit())
+            throw new MaxWeightExceededException("Can't load medications. Max weight ( " + drone.getWeightLimit() + " )exceeded!");
         Delivery delivery = new Delivery(drone, medicationList);
-        Delivery savedDelivery = saveDelivery(delivery);
+        Delivery savedDelivery = deliveryRepository.save(delivery);
         drone.setActualDelivery(delivery);
         droneService.updateDrone(drone);
         return savedDelivery;

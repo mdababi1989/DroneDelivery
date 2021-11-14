@@ -1,8 +1,5 @@
 package com.mdababi.dronedelivery.exceptions;
 
-import com.mdababi.dronedelivery.exceptions.DroneNotFoundException;
-import com.mdababi.dronedelivery.exceptions.NoDataFoundException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -11,18 +8,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import javax.persistence.EntityNotFoundException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
@@ -42,6 +31,28 @@ public class ControllerExceptionHandler {
   public ResponseEntity<Object> handleNodataFoundException(
           NoDataFoundException ex, WebRequest request) {
     return getObjectResponseEntity(ex.getMessage());
+  }
+
+  @ExceptionHandler(LowBatteryException.class)
+  public ResponseEntity<Object> handleLowBatteryException(
+          LowBatteryException ex, WebRequest request) {
+    return getObjectResponseEntityBadRequest(ex.getMessage());
+  }
+
+  @ExceptionHandler(MaxWeightExceededException.class)
+  public ResponseEntity<Object> handleMaxWeightExceededException(
+          MaxWeightExceededException ex, WebRequest request) {
+    return getObjectResponseEntityBadRequest(ex.getMessage());
+  }
+
+  private ResponseEntity<Object> getObjectResponseEntityBadRequest(String message) {
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("timestamp", LocalDateTime.now());
+    body.put("status", "400");
+    body.put("error", "Bad Request");
+    body.put("message", message);
+
+    return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
   }
 
   private ResponseEntity<Object> getObjectResponseEntity(String message) {

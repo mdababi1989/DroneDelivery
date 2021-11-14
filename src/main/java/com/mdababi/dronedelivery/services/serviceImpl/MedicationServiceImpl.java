@@ -22,7 +22,8 @@ public class MedicationServiceImpl implements MedicationService {
     public List<Medication> getMedicationList() {
         List<Medication> medicationList = medicationRepository.findAll();
         if (medicationList.isEmpty()) throw new NoDataFoundException("Medication");
-        return medicationList;    }
+        return medicationList;
+    }
 
     @Override
     public Medication findById(String code) {
