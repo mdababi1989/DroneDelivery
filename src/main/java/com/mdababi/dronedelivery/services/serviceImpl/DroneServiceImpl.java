@@ -1,6 +1,8 @@
 package com.mdababi.dronedelivery.services.serviceImpl;
 
 
+import com.mdababi.dronedelivery.exceptions.DroneNotFoundException;
+import com.mdababi.dronedelivery.exceptions.NoDataFoundException;
 import com.mdababi.dronedelivery.model.Drone;
 import com.mdababi.dronedelivery.model.DroneState;
 import com.mdababi.dronedelivery.model.Medication;
@@ -9,6 +11,8 @@ import com.mdababi.dronedelivery.services.DroneService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,12 +23,14 @@ public class DroneServiceImpl implements DroneService {
 
     @Override
     public List<Drone> getDroneList() {
-        return droneRepository.findAll();
+        List<Drone> droneList = droneRepository.findAll();
+        if (droneList.isEmpty()) throw new NoDataFoundException("Drone");
+        return droneList;
     }
 
     @Override
     public Drone findById(String serialNumber) {
-        return droneRepository.findById(serialNumber).orElse(null);
+        return droneRepository.findById(serialNumber).orElseThrow(() -> new DroneNotFoundException(serialNumber));
     }
 
     @Override
@@ -43,19 +49,25 @@ public class DroneServiceImpl implements DroneService {
     }
 
     @Override
-    public List<Medication> loadedMedications(Drone drone) {
-        if(drone.getActualDelivery()!=null)
-            return drone.getActualDelivery().getMedicationList();
-        return null;
+    public List<Medication> loadedMedications(String serialNumber) {
+        Drone drone = findById(serialNumber);
+        if (drone.getActualDelivery() == null) {
+            throw new NoDataFoundException("Medication");
+        }
+        return drone.getActualDelivery().getMedicationList();
     }
 
     @Override
-    public int getBatteryLevel(Drone drone) {
+    public int getBatteryLevel(String serialNumber) {
+        Drone drone = findById(serialNumber);
+        if (drone == null) throw new EntityNotFoundException("there is no drone with serial number: " + serialNumber);
         return drone.getBatteryCapacity();
     }
 
     @Override
     public List<Drone> getAvailableDrones() {
-        return droneRepository.findAll().stream().filter(drone -> drone.getState()== DroneState.IDLE).collect(Collectors.toList());
+        List<Drone> droneList = droneRepository.findAll();
+        if (droneList.isEmpty()) throw new NoDataFoundException("Drone");
+        return droneList.stream().filter(drone -> drone.getState() == DroneState.IDLE).collect(Collectors.toList());
     }
 }

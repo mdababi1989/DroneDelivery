@@ -15,26 +15,26 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class Drone implements Serializable {
     @Id
     @Size(max = 100, message = "Serial number size must not exceed 100 characters")
-    @Column(name = "serial_number", length=50)
+    @Column(name = "serial_number", length=100)
     private String serialNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "model")
     private DroneModel model;
 
-    @Max(500)
-    @Min(0)
-    @NotEmpty(message = "Please provide a weight limit for the drone")
+    @Min(value = 1, message = "Weight Limit should not be less than 1")
+    @Max(value = 500, message = "Weight Limit should not be greater than 500")
     @Column(name = "weight")
-    private int weightLimit;
+    private Integer weightLimit;
 
-    @Max(100)
-    @Min(0)
+    @Min(value = 0, message = "Battery Capacity should not be less than 0")
+    @Max(value = 100, message = "Battery Capacity should not be greater than 100")
     @Column(name = "battery_capacity")
-    private int batteryCapacity;
+    private Integer batteryCapacity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state")

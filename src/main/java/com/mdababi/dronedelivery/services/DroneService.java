@@ -13,8 +13,8 @@ public interface DroneService {
     Drone saveDrone(Drone drone);
     Drone updateDrone(Drone drone);
     void deleteDrone(String serialNumber);
-    List<Medication> loadedMedications(Drone drone);
-    int getBatteryLevel(Drone drone);
+    List<Medication> loadedMedications(String drone);
+    int getBatteryLevel(String drone);
     List<Drone> getAvailableDrones();
 
 }
