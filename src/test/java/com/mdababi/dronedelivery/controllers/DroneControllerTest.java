@@ -106,7 +106,6 @@ class DroneControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect( jsonPath("$.weightLimit").value("Weight Limit should not be greater than 500 ( rejected value: 900 )"))
                 .andExpect( jsonPath("$.weightLimit").value("Weight Limit should not be greater than 500 ( rejected value: 900 )"));
     }
 

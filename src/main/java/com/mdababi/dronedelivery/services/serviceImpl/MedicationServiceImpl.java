@@ -1,6 +1,10 @@
 package com.mdababi.dronedelivery.services.serviceImpl;
 
 
+import com.mdababi.dronedelivery.exceptions.DroneNotFoundException;
+import com.mdababi.dronedelivery.exceptions.MedicationNotFoundException;
+import com.mdababi.dronedelivery.exceptions.NoDataFoundException;
+import com.mdababi.dronedelivery.model.Drone;
 import com.mdababi.dronedelivery.model.Medication;
 import com.mdababi.dronedelivery.repositories.MedicationRepository;
 import com.mdababi.dronedelivery.services.MedicationService;
@@ -16,12 +20,13 @@ public class MedicationServiceImpl implements MedicationService {
 
     @Override
     public List<Medication> getMedicationList() {
-        return medicationRepository.findAll();
-    }
+        List<Medication> medicationList = medicationRepository.findAll();
+        if (medicationList.isEmpty()) throw new NoDataFoundException("Medication");
+        return medicationList;    }
 
     @Override
     public Medication findById(String code) {
-        return medicationRepository.findById(code).orElse(null);
+        return medicationRepository.findById(code).orElseThrow(() -> new MedicationNotFoundException(code));
     }
 
     @Override
@@ -36,6 +41,7 @@ public class MedicationServiceImpl implements MedicationService {
 
     @Override
     public void deleteMedication(String code) {
+        Medication medication = findById(code);
         medicationRepository.deleteById(code);
     }
 }

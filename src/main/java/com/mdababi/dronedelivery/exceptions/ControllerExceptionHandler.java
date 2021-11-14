@@ -1,4 +1,4 @@
-package com.mdababi.dronedelivery.controllers;
+package com.mdababi.dronedelivery.exceptions;
 
 import com.mdababi.dronedelivery.exceptions.DroneNotFoundException;
 import com.mdababi.dronedelivery.exceptions.NoDataFoundException;
@@ -29,6 +29,12 @@ public class ControllerExceptionHandler {
   @ExceptionHandler(DroneNotFoundException.class)
   public ResponseEntity<Object> handleDroneNotFoundException(
           DroneNotFoundException ex, WebRequest request) {
+    return getObjectResponseEntity(ex.getMessage());
+  }
+
+  @ExceptionHandler(MedicationNotFoundException.class)
+  public ResponseEntity<Object> handleMedicationNotFoundException(
+          MedicationNotFoundException ex, WebRequest request) {
     return getObjectResponseEntity(ex.getMessage());
   }
 
