@@ -33,7 +33,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         /* Verify that the drone exist */
         Drone drone = droneService.findById(deliveryDto.getDroneSerialNumber());
         if (drone == null) throw new DroneNotFoundException(deliveryDto.getDroneSerialNumber());
-
+        /* Verify that the drone is available */
+        if(drone.getState() != DroneState.IDLE) throw new DroneNotAvailableException(drone.getSerialNumber());
         /* Verify that that battery level is above 24% */
         if (drone.getBatteryCapacity() < 25)
             throw new LowBatteryException("Medication can't be loaded! Drone battery capacity is under 25%");
