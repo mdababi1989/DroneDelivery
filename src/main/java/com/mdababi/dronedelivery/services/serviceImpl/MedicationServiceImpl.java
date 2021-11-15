@@ -42,7 +42,7 @@ public class MedicationServiceImpl implements MedicationService {
 
     @Override
     public void deleteMedication(String code) {
-        Medication medication = findById(code);
+        Medication medication = findById(code);//         // verify that the medication item exists
         medicationRepository.deleteById(code);
     }
 }

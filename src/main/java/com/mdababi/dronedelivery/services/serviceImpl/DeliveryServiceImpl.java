@@ -2,10 +2,7 @@ package com.mdababi.dronedelivery.services.serviceImpl;
 
 
 import com.mdababi.dronedelivery.exceptions.*;
-import com.mdababi.dronedelivery.model.Delivery;
-import com.mdababi.dronedelivery.model.DeliveryDto;
-import com.mdababi.dronedelivery.model.Drone;
-import com.mdababi.dronedelivery.model.Medication;
+import com.mdababi.dronedelivery.model.*;
 import com.mdababi.dronedelivery.repositories.DeliveryRepository;
 import com.mdababi.dronedelivery.services.DeliveryService;
 import com.mdababi.dronedelivery.services.DroneService;
@@ -33,11 +30,14 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public Delivery createDelivery(DeliveryDto deliveryDto) {
-
+        /* Verify that the drone exist */
         Drone drone = droneService.findById(deliveryDto.getDroneSerialNumber());
         if (drone == null) throw new DroneNotFoundException(deliveryDto.getDroneSerialNumber());
+
+        /* Verify that that battery level is above 24% */
         if (drone.getBatteryCapacity() < 25)
             throw new LowBatteryException("Medication can't be loaded! Drone battery capacity is under 25%");
+        /* Verify that the medications items exist */
         List<Medication> medicationList = new ArrayList<>();
         int medicationWeightSum = 0;
         for (String medicationCode : deliveryDto.getMedicationList()) {
@@ -46,11 +46,18 @@ public class DeliveryServiceImpl implements DeliveryService {
             medicationList.add(medication);
             medicationWeightSum += medication.getWeight();
         }
+        /* verify that the medication items total weight is less than the drone maximum weight**/
         if (medicationWeightSum > drone.getWeightLimit())
             throw new MaxWeightExceededException("Can't load medications. Max weight ( " + drone.getWeightLimit() + " )exceeded!");
+        /* The drone pass to the loading state (waiting for medications items to be loaded) */
+        drone.setState(DroneState.LOADING);
+        droneService.saveDrone(drone);
+        /* Create the delivery */
         Delivery delivery = new Delivery(drone, medicationList);
         Delivery savedDelivery = deliveryRepository.save(delivery);
+        /* Add the delivery to the drone. The drone pass to the LOADED state  */
         drone.setActualDelivery(delivery);
+        drone.setState(DroneState.LOADED);
         droneService.updateDrone(drone);
         return savedDelivery;
     }

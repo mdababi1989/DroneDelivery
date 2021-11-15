@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/*
+This class is used as a Global Exception Handling and apply them across the whole application
+ */
 @ControllerAdvice
 public class ControllerExceptionHandler {
   @ExceptionHandler(DroneNotFoundException.class)

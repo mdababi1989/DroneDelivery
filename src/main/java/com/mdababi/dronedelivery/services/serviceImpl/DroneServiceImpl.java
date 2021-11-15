@@ -62,8 +62,9 @@ public class DroneServiceImpl implements DroneService {
 
     @Override
     public List<Medication> loadedMedications(String serialNumber) {
+        // getting the drone from the database if it exists
         Drone drone = findById(serialNumber);
-        if (drone.getActualDelivery() == null) {
+        if (drone.getActualDelivery() == null) { // if the drone is not carrying medication (doesn't have an actual delivery)
             throw new NoDataFoundException("Medication");
         }
         return drone.getActualDelivery().getMedicationList();

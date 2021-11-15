@@ -25,6 +25,8 @@ public class ApplicationBootstrap implements CommandLineRunner {
     private DeliveryService deliveryService;
     @Override
     public void run(String... args) throws Exception {
+
+        // create bootstrap data in the database
         Drone drone1 = new Drone("drone1serialnumber", DroneModel.Lightweight, 200, 56, DroneState.IDLE, null);
         Drone drone2 = new Drone("drone2serialnumber", DroneModel.Cruiserweight, 300, 10, DroneState.IDLE, null);
         Drone drone3 = new Drone("drone3serialnumber", DroneModel.Middleweight, 350, 63, DroneState.IDLE, null);
@@ -48,6 +50,7 @@ public class ApplicationBootstrap implements CommandLineRunner {
         deliveryDto2.setMedicationList(Arrays.asList(medication1, medication2, medication4).stream().map(Medication::getCode).collect(Collectors.toList()));
         deliveryService.createDelivery(deliveryDto2);
 
+        // test Prevent the drone from being in LOADING state if the battery level is below 25% functionality and log error
         DeliveryDto deliveryDto3 = new DeliveryDto();
         deliveryDto3.setDroneSerialNumber("drone2serialnumber");
         deliveryDto3.setMedicationList(Arrays.asList(medication1, medication2, medication4).stream().map(Medication::getCode).collect(Collectors.toList()));
@@ -57,6 +60,7 @@ public class ApplicationBootstrap implements CommandLineRunner {
             log.error("cant load medication for drone drone2serialnumber! Low battery error");
         }
 
+        // test Prevent the drone from being loaded with more weight that it can carry functionality and log error
         DeliveryDto deliveryDto4 = new DeliveryDto();
         deliveryDto4.setDroneSerialNumber("drone1serialnumber");
         deliveryDto4.setMedicationList(Arrays.asList(medication1, medication2, medication4).stream().map(Medication::getCode).collect(Collectors.toList()));

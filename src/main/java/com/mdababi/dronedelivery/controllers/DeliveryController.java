@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,15 +16,22 @@ import java.util.List;
 public class DeliveryController {
     private DeliveryService deliveryService;
 
+
+    /*
+        Get delivery list from database
+     */
     @GetMapping
-    public ResponseEntity<List<Delivery>> getDeliveryList(){
+    public ResponseEntity<List<Delivery>> getDeliveryList() {
         List<Delivery> deliveryList = deliveryService.getDeliveryList();
         return new ResponseEntity<>(deliveryList, HttpStatus.OK);
     }
 
+    /*
+        create delivery in the database
+     */
     @PostMapping("add")
-    public ResponseEntity<Delivery> addDelivery(@RequestBody DeliveryDto delivery){
+    public ResponseEntity<Delivery> addDelivery(@RequestBody DeliveryDto delivery) {
         Delivery savedDelivery = deliveryService.createDelivery(delivery);
-        return new ResponseEntity<Delivery>(savedDelivery, HttpStatus.CREATED);
+        return new ResponseEntity<>(savedDelivery, HttpStatus.CREATED);
     }
 }
