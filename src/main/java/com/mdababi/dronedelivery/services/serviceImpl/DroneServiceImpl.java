@@ -33,7 +33,7 @@ public class DroneServiceImpl implements DroneService {
         return droneList;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 300000) // every 5 minutes
     public void reportDronesBatteryLevel() {
         droneRepository.findAll().forEach(
                 drone -> log.info("Drone Serial Number {}, Battery level: {}", drone.getSerialNumber(), drone.getBatteryCapacity())
