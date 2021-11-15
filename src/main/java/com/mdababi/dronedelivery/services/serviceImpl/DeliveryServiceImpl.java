@@ -7,12 +7,17 @@ import com.mdababi.dronedelivery.repositories.DeliveryRepository;
 import com.mdababi.dronedelivery.services.DeliveryService;
 import com.mdababi.dronedelivery.services.DroneService;
 import com.mdababi.dronedelivery.services.MedicationService;
+import com.mdababi.dronedelivery.util.UpdateDroneState;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 @Service
 @AllArgsConstructor
@@ -60,6 +65,17 @@ public class DeliveryServiceImpl implements DeliveryService {
         drone.setActualDelivery(delivery);
         drone.setState(DroneState.LOADED);
         droneService.updateDrone(drone);
+        /*  Wait for  waitingTimeBeforeDeliveryFinish the return drone state to IDLE  */
+        /*   waitingTimeBeforeDeliveryFinish is between 1 minute (60 000 ms) and 5 min (300 000ms)  */
+        int waitingTimeBeforeDeliveryFinish = new Random().nextInt(300_000 - 60_000 + 1) + 60_000;
+        UpdateDroneState updateDroneState = new UpdateDroneState(waitingTimeBeforeDeliveryFinish, drone.getSerialNumber());
+        FutureTask<String>
+                futureTask1 = new FutureTask<>(updateDroneState,
+                "updateDroneState is complete");
+        // create thread pool of 2 size for ExecutorService
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(updateDroneState);
+
         return savedDelivery;
     }
 }
